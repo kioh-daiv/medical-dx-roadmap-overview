@@ -11,13 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run lychee
+        id: lychee
         uses: lycheeverse/lychee-action@v2
         with:
           args: "--no-progress --max-concurrency 4 ./**/*.html"
-          fail: false
           output: ./lychee/out.md
+          fail: false
       - name: Create issue on broken links
-        if: env.lychee_exit_code != '0'
+        if: steps.lychee.outputs.exit_code != 0
         uses: peter-evans/create-issue-from-file@v5
         with:
           title: "リンク切れ検出（自動）"
