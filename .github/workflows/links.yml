@@ -1,0 +1,25 @@
+name: Link Check
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 1"
+permissions:
+  issues: write
+jobs:
+  linkChecker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: "--no-progress --max-concurrency 4 ./**/*.html"
+          fail: false
+          output: ./lychee/out.md
+      - name: Create issue on broken links
+        if: env.lychee_exit_code != '0'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "リンク切れ検出（自動）"
+          content-filepath: ./lychee/out.md
+          labels: link-check, automated
